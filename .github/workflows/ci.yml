@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Forge tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Build
+        run: forge build --sizes
+
+      - name: Run tests (with fuzzing)
+        run: forge test -vvv --fuzz-runs 500
+
+      - name: Run invariant tests
+        run: forge test -vvv --match-contract Invariant
+
+      - name: Gas snapshot
+        run: forge snapshot
