@@ -62,7 +62,7 @@ contract StakingTest is Test {
     }
 }
 
-/// Invariant test handler — foundry calls random sequences of these
+/// Invariant test handler - foundry calls random sequences of these
 contract StakingInvariantHandler is Test {
     Staking public staking;
     address[] public actors;
