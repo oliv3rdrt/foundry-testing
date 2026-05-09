@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-/// Minimal staking contract — used to practice invariant testing
+/// Minimal staking contract - used to practice invariant testing
 /// Invariant: totalStaked == sum of all user stakes
 contract Staking {
     mapping(address => uint256) public stakes;
