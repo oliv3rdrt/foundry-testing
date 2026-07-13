@@ -67,10 +67,7 @@ contract VaultInvariantTest is Test {
 
     /// Ghost accounting: net flow (deposits - withdrawals) must equal contract balance
     function invariant_netFlowEqualsBalance() public view {
-        assertEq(
-            address(vault).balance,
-            handler.ghostTotalDeposits() - handler.ghostTotalWithdrawals()
-        );
+        assertEq(address(vault).balance, handler.ghostTotalDeposits() - handler.ghostTotalWithdrawals());
     }
 
     /// totalAssets() is a thin view but should never lie

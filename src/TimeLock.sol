@@ -33,7 +33,11 @@ contract TimeLock {
         return keccak256(abi.encode(target, value, data, salt));
     }
 
-    function queue(address target, uint256 value, bytes calldata data, bytes32 salt) external onlyAdmin returns (bytes32 id) {
+    function queue(address target, uint256 value, bytes calldata data, bytes32 salt)
+        external
+        onlyAdmin
+        returns (bytes32 id)
+    {
         id = hashOp(target, value, data, salt);
         if (queuedAt[id] != 0) revert AlreadyQueued();
         uint256 eta = block.timestamp + delay;
@@ -47,7 +51,12 @@ contract TimeLock {
         emit Cancelled(id);
     }
 
-    function execute(address target, uint256 value, bytes calldata data, bytes32 salt) external payable onlyAdmin returns (bytes memory) {
+    function execute(address target, uint256 value, bytes calldata data, bytes32 salt)
+        external
+        payable
+        onlyAdmin
+        returns (bytes memory)
+    {
         bytes32 id = hashOp(target, value, data, salt);
         uint256 eta = queuedAt[id];
         if (eta == 0) revert NotQueued();
