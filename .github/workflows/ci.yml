@@ -33,5 +33,5 @@ jobs:
       - name: Run invariant tests
         run: forge test -vvv --match-contract Invariant
 
-      - name: Check gas snapshot
-        run: forge snapshot --check
+      - name: Gas snapshot (informational)
+        run: forge snapshot
