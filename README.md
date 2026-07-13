@@ -1,6 +1,6 @@
 # foundry-testing
 
-Foundry workspace built around three small contracts. The interesting part is the test suite: unit tests, fuzz tests, and a stateful invariant suite with a handler. Full suite runs in ~130ms across 13 tests, including 256 invariant runs and 3,840 random calls.
+Foundry workspace built around seven small contracts. The interesting part is the test suite: unit tests, fuzz tests, and stateful invariant suites with handlers. The full suite runs in under 200ms across 51 tests, including invariant runs that exercise thousands of random call sequences.
 
 ## Stack
 
@@ -29,15 +29,26 @@ forge snapshot
 forge test --gas-report
 ```
 
+Formatting and the gas baseline are enforced in CI:
+
+```bash
+forge fmt --check
+forge snapshot --check
+```
+
 ## What's in here
 
-| Contract | Test types |
-|---|---|
-| `src/Counter.sol` | unit, fuzz |
-| `src/Vault.sol` | unit, fuzz, invariant (with `VaultHandler.sol`) |
-| `src/Staking.sol` | unit, fuzz |
+| Contract | Description | Test types |
+|---|---|---|
+| `src/Counter.sol` | Trivial counter | unit, fuzz |
+| `src/Token.sol` | Minimal ERC20-style token | unit, fuzz |
+| `src/NFT.sol` | Minimal ERC721-style NFT | unit, fuzz |
+| `src/Vault.sol` | ETH vault | unit, fuzz, invariant |
+| `src/Staking.sol` | ETH staking | unit, fuzz, invariant |
+| `src/TimeLock.sol` | Queue/execute/cancel timelock | unit, fuzz |
+| `src/Ownable.sol` | Two-step ownership mixin | unit |
 
-Tests live in `test/`. The invariant handler in `test/VaultHandler.sol` constrains the random call surface so invariants converge instead of bouncing off reverts.
+Tests live in `test/`. The invariant handler in `test/VaultInvariant.t.sol` constrains the random call surface (bounded amounts, a fixed actor set) so invariants converge instead of bouncing off reverts, and it tracks ghost variables to cross-check the contract's own accounting.
 
 ## Why Foundry over Hardhat
 
