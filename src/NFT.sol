@@ -35,7 +35,9 @@ contract NFT {
         require(to != address(0), "NFT: mint to zero");
         require(_owners[tokenId] == address(0), "NFT: already minted");
         _owners[tokenId] = to;
-        unchecked { _balances[to] += 1; }
+        unchecked {
+            _balances[to] += 1;
+        }
         emit Transfer(address(0), to, tokenId);
     }
 
@@ -56,9 +58,7 @@ contract NFT {
         address owner = ownerOf(tokenId);
         require(owner == from, "NFT: from is not owner");
         require(
-            msg.sender == owner ||
-                isApprovedForAll[owner][msg.sender] ||
-                getApproved[tokenId] == msg.sender,
+            msg.sender == owner || isApprovedForAll[owner][msg.sender] || getApproved[tokenId] == msg.sender,
             "NFT: not authorized"
         );
 
