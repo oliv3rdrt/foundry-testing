@@ -14,7 +14,7 @@ contract TokenTest is Test {
     function setUp() public {
         token = new Token("Test", "TST", INITIAL);
         // Move the entire supply to alice so tests start from a known state
-        token.transfer(alice, INITIAL);
+        assertTrue(token.transfer(alice, INITIAL));
     }
 
     function test_Metadata() public view {
@@ -26,7 +26,7 @@ contract TokenTest is Test {
 
     function test_Transfer() public {
         vm.prank(alice);
-        token.transfer(bob, 100 ether);
+        assertTrue(token.transfer(bob, 100 ether));
 
         assertEq(token.balanceOf(alice), INITIAL - 100 ether);
         assertEq(token.balanceOf(bob), 100 ether);
@@ -50,7 +50,7 @@ contract TokenTest is Test {
         assertEq(token.allowance(alice, bob), 50 ether);
 
         vm.prank(bob);
-        token.transferFrom(alice, bob, 30 ether);
+        assertTrue(token.transferFrom(alice, bob, 30 ether));
 
         assertEq(token.balanceOf(bob), 30 ether);
         assertEq(token.allowance(alice, bob), 20 ether);
@@ -70,7 +70,7 @@ contract TokenTest is Test {
         token.approve(bob, type(uint256).max);
 
         vm.prank(bob);
-        token.transferFrom(alice, bob, 100 ether);
+        assertTrue(token.transferFrom(alice, bob, 100 ether));
 
         // Infinite allowance should be preserved across transfers
         assertEq(token.allowance(alice, bob), type(uint256).max);
@@ -79,7 +79,7 @@ contract TokenTest is Test {
     function testFuzz_Transfer_PreservesTotalSupply(uint256 amount) public {
         amount = bound(amount, 0, INITIAL);
         vm.prank(alice);
-        token.transfer(bob, amount);
+        assertTrue(token.transfer(bob, amount));
 
         assertEq(token.balanceOf(alice) + token.balanceOf(bob), INITIAL);
         assertEq(token.totalSupply(), INITIAL);
