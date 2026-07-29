@@ -12,11 +12,12 @@ contract TimeLockTest is Test {
     address admin = makeAddr("admin");
     address attacker = makeAddr("attacker");
     uint256 constant DELAY = 2 days;
+    uint256 constant GRACE_PERIOD = 14 days;
 
     function setUp() public {
         // Deploy as the admin so Ownable makes it the owner.
         vm.prank(admin);
-        timelock = new TimeLock(DELAY);
+        timelock = new TimeLock(DELAY, GRACE_PERIOD);
         counter = new Counter();
     }
 
@@ -50,6 +51,21 @@ contract TimeLockTest is Test {
         vm.warp(block.timestamp + DELAY - 1);
 
         vm.expectRevert(); // TooEarly
+        vm.prank(admin);
+        timelock.execute(address(counter), 0, data, salt);
+    }
+
+    function test_Execute_RevertWhenStale() public {
+        bytes memory data = _setNumberCalldata(1);
+        bytes32 salt = bytes32(uint256(1));
+
+        vm.prank(admin);
+        timelock.queue(address(counter), 0, data, salt);
+
+        // Past eta plus the grace period the operation is stale.
+        vm.warp(block.timestamp + DELAY + GRACE_PERIOD + 1);
+
+        vm.expectRevert(); // TooLate
         vm.prank(admin);
         timelock.execute(address(counter), 0, data, salt);
     }
@@ -109,8 +125,8 @@ contract TimeLockTest is Test {
         timelock.execute(address(counter), 0, data, salt);
     }
 
-    function testFuzz_ExecuteAtAnyTimeAfterEta(uint256 wait) public {
-        wait = bound(wait, DELAY, DELAY + 365 days);
+    function testFuzz_ExecuteAnytimeWithinGracePeriod(uint256 wait) public {
+        wait = bound(wait, DELAY, DELAY + GRACE_PERIOD);
         bytes memory data = _setNumberCalldata(99);
         bytes32 salt = bytes32(uint256(1));
 

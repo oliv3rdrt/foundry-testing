@@ -8,6 +8,9 @@ import {Ownable} from "./Ownable.sol";
 /// Used to practice testing block.timestamp manipulation with vm.warp.
 contract TimeLock is Ownable {
     uint256 public immutable delay;
+    // Once eta passes there is a window of gracePeriod to execute in. After that
+    // the queued operation is stale and has to be queued again.
+    uint256 public immutable gracePeriod;
 
     mapping(bytes32 => uint256) public queuedAt; // 0 means not queued
 
@@ -18,11 +21,13 @@ contract TimeLock is Ownable {
     error AlreadyQueued();
     error NotQueued();
     error TooEarly(uint256 eta, uint256 now_);
+    error TooLate(uint256 deadline, uint256 now_);
     error CallFailed(bytes returndata);
 
     // Ownable's constructor sets the deployer as the owner (the admin here).
-    constructor(uint256 delay_) {
+    constructor(uint256 delay_, uint256 gracePeriod_) {
         delay = delay_;
+        gracePeriod = gracePeriod_;
     }
 
     function hashOp(address target, uint256 value, bytes calldata data, bytes32 salt) public pure returns (bytes32) {
@@ -57,6 +62,8 @@ contract TimeLock is Ownable {
         uint256 eta = queuedAt[id];
         if (eta == 0) revert NotQueued();
         if (block.timestamp < eta) revert TooEarly(eta, block.timestamp);
+        uint256 deadline = eta + gracePeriod;
+        if (block.timestamp > deadline) revert TooLate(deadline, block.timestamp);
 
         delete queuedAt[id];
         (bool ok, bytes memory ret) = target.call{value: value}(data);
