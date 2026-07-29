@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-/// Minimal timelock: queue a call, wait `delay`, then execute. Single admin.
+import {Ownable} from "./Ownable.sol";
+
+/// Minimal timelock: queue a call, wait `delay`, then execute. Admin rights come
+/// from the two-step Ownable mixin, so the admin can be handed over safely.
 /// Used to practice testing block.timestamp manipulation with vm.warp.
-contract TimeLock {
-    address public admin;
+contract TimeLock is Ownable {
     uint256 public immutable delay;
 
     mapping(bytes32 => uint256) public queuedAt; // 0 means not queued
@@ -13,19 +15,13 @@ contract TimeLock {
     event Executed(bytes32 indexed id, address target, uint256 value, bytes data);
     event Cancelled(bytes32 indexed id);
 
-    error NotAdmin();
     error AlreadyQueued();
     error NotQueued();
     error TooEarly(uint256 eta, uint256 now_);
     error CallFailed(bytes returndata);
 
-    modifier onlyAdmin() {
-        if (msg.sender != admin) revert NotAdmin();
-        _;
-    }
-
-    constructor(address admin_, uint256 delay_) {
-        admin = admin_;
+    // Ownable's constructor sets the deployer as the owner (the admin here).
+    constructor(uint256 delay_) {
         delay = delay_;
     }
 
@@ -35,7 +31,7 @@ contract TimeLock {
 
     function queue(address target, uint256 value, bytes calldata data, bytes32 salt)
         external
-        onlyAdmin
+        onlyOwner
         returns (bytes32 id)
     {
         id = hashOp(target, value, data, salt);
@@ -45,7 +41,7 @@ contract TimeLock {
         emit Queued(id, target, value, data, eta);
     }
 
-    function cancel(bytes32 id) external onlyAdmin {
+    function cancel(bytes32 id) external onlyOwner {
         if (queuedAt[id] == 0) revert NotQueued();
         delete queuedAt[id];
         emit Cancelled(id);
@@ -54,7 +50,7 @@ contract TimeLock {
     function execute(address target, uint256 value, bytes calldata data, bytes32 salt)
         external
         payable
-        onlyAdmin
+        onlyOwner
         returns (bytes memory)
     {
         bytes32 id = hashOp(target, value, data, salt);
