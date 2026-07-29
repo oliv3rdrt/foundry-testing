@@ -43,12 +43,12 @@ forge snapshot --check
 | `src/Counter.sol` | Trivial counter | unit, fuzz |
 | `src/Token.sol` | Minimal ERC20-style token | unit, fuzz |
 | `src/NFT.sol` | Minimal ERC721-style NFT | unit, fuzz |
-| `src/Vault.sol` | ETH vault | unit, fuzz, invariant |
-| `src/Staking.sol` | ETH staking | unit, fuzz, invariant |
+| `src/Vault.sol` | ETH vault | unit, fuzz, invariant, reentrancy |
+| `src/Staking.sol` | ETH staking | unit, fuzz, invariant, reentrancy |
 | `src/TimeLock.sol` | Queue/execute/cancel timelock | unit, fuzz |
 | `src/Ownable.sol` | Two-step ownership mixin | unit |
 
-Tests live in `test/`. The invariant handler in `test/VaultInvariant.t.sol` constrains the random call surface (bounded amounts, a fixed actor set) so invariants converge instead of bouncing off reverts, and it tracks ghost variables to cross-check the contract's own accounting.
+Tests live in `test/`. The invariant handlers in `test/VaultInvariant.t.sol` and `test/StakingInvariant.t.sol` constrain the random call surface (bounded amounts, a fixed actor set) so invariants converge instead of bouncing off reverts, and they track ghost variables to cross-check each contract's own accounting.
 
 ## Why Foundry over Hardhat
 
