@@ -43,8 +43,8 @@ forge snapshot --check
 | `src/Counter.sol` | Trivial counter | unit, fuzz |
 | `src/Token.sol` | Minimal ERC20-style token | unit, fuzz |
 | `src/NFT.sol` | Minimal ERC721-style NFT | unit, fuzz |
-| `src/Vault.sol` | ETH vault | unit, fuzz, invariant |
-| `src/Staking.sol` | ETH staking | unit, fuzz, invariant |
+| `src/Vault.sol` | ETH vault | unit, fuzz, invariant, reentrancy |
+| `src/Staking.sol` | ETH staking | unit, fuzz, invariant, reentrancy |
 | `src/TimeLock.sol` | Queue/execute/cancel timelock | unit, fuzz |
 | `src/Ownable.sol` | Two-step ownership mixin | unit |
 
